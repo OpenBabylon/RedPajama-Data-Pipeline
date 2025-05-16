@@ -103,8 +103,8 @@ for lang in "${LANGUAGES[@]}"; do
 done
 
 echo "__UPDATE_CONENTLISTS_START__ @ $(date)"
-docker run -v "${DATA_ROOT%/}":"${DOCKER_MNT_DIR%/}" -t "${DOCKER_REPO}" \
-  python3 src/artifacts/update_resources.py \
+#docker run -v "${DATA_ROOT%/}":"${DOCKER_MNT_DIR%/}" -t "${DOCKER_REPO}" \
+python3 src/artifacts/update_resources.py \
   --langs "${LANGUAGES[@]}" \
   --artifacts_dir "${ARTIFACTS_DIR%/}" \
   --block_categories "${DOMAIN_BLACKLIST_CATEGORIES[@]}"
