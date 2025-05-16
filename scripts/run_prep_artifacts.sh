@@ -84,9 +84,9 @@ cp "$CONFIG_FILE" "${ARTIFACTS_DIR%/}/config.conf"
 ARTIFACTS_DIR="${DOCKER_MNT_DIR%/}/artifacts-${RUN_ID}"
 for lang in "${LANGUAGES[@]}"; do
   echo "__LANG_PREP_START__ ${lang} @ $(date)"
-  docker run --env AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" --env AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-    -v "${DATA_ROOT%/}":"${DOCKER_MNT_DIR%/}" -t "${DOCKER_REPO}" \
-    python3 src/prep_artifacts.py \
+#  docker run --env AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" --env AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+#    -v "${DATA_ROOT%/}":"${DOCKER_MNT_DIR%/}" -t "${DOCKER_REPO}" \
+  python3 app/src/prep_artifacts.py \
     --artifacts_dir "${ARTIFACTS_DIR%/}" \
     --cc_input "${ARTIFACTS_DIR%/}/listings/listings.txt" \
     --cc_input_base_uri "${S3_BUCKET%/}${S3_CCNET_PREFIX%/}" \
@@ -104,10 +104,11 @@ done
 
 echo "__UPDATE_CONENTLISTS_START__ @ $(date)"
 #docker run -v "${DATA_ROOT%/}":"${DOCKER_MNT_DIR%/}" -t "${DOCKER_REPO}" \
-python3 src/artifacts/update_resources.py \
+python3 app/src/artifacts/update_resources.py \
   --langs "${LANGUAGES[@]}" \
   --artifacts_dir "${ARTIFACTS_DIR%/}" \
-  --block_categories "${DOMAIN_BLACKLIST_CATEGORIES[@]}"
+  --block_categories "${DOMAIN_BLACKLIST_CATEGORIES[@]}" \
+  --local_bad_wordlists_dir "${LOCAL_BAD_WORDS_DIR}"
 
 echo "__UPDATE_CONENTLISTS_END__ @ $(date)"
 
@@ -118,7 +119,7 @@ EXPORT_ARTIFACTS="${DATA_ROOT%/}/_EXPORT_artifacts-${RUN_ID}"
 mkdir -p "${EXPORT_ARTIFACTS%/}"
 
 # copy wikiref model to artifacts dir
-cp "${DATA_ROOT%/}/wikiref-models/en/en-model.bin" "${ARTIFACTS_DIR%/}/classifiers/en/wikiref.model.bin"
+cp "${DATA_ROOT%/}/wikiref-models/en/wikiref.model.bin" "${ARTIFACTS_DIR%/}/classifiers/uk/wikiref.model.bin"
 
 # move artifacts to export
 cp -r "${ARTIFACTS_DIR%/}/dsir" "${EXPORT_ARTIFACTS%/}/"

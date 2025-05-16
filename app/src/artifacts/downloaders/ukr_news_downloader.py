@@ -15,11 +15,10 @@ def remove_html_tags(text):
 
 
 class UkrNewsDownloader:
-    r""" Loads the RedPajama Books dataset from HuggingFace Datasets and saves
-    it to disk """
+    r""" Loads dataset from HuggingFace Datasets and save it to disk """
 
-    dataset_name = "ukrainian_news"
-    output_fp = "ukrainian-news/en-books.jsonl.gz"
+    dataset_name = "malyuk"
+    output_fp = "malyuk/malyuk.jsonl.gz"
 
     def __init__(
             self, lang, out_dir, overwrite, cache_dir, max_samples,
@@ -87,7 +86,7 @@ class UkrNewsDownloader:
 
         n_docs = 0
         for book in load_dataset(
-                "zeusfsx/ukrainian-news",
+                "lang-uk/malyuk",
                 cache_dir=self._cache_dir,
                 split="train",
                 streaming=True,

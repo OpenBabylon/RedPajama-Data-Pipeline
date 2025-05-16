@@ -1,4 +1,5 @@
 import argparse
+import os
 from collections import defaultdict
 import itertools
 import json
@@ -104,6 +105,27 @@ def create_bad_urls_index(artifacts_dir: Path, raw_categories: List[str]):
         json.dump(category_index, f)
 
 
+def load_from_local_bad_words(
+        dirpath, lang, artifacts_dir
+):
+    if lang in os.listdir(dirpath):
+        words = json.load(open(os.path.join(dirpath, lang, "words.json"), 'r'))
+
+        ldnoobw_dir = artifacts_dir / "bad_words"
+        if not ldnoobw_dir.exists():
+            ldnoobw_dir.mkdir(parents=True)
+        word_list_fp = ldnoobw_dir / f"{lang}.txt"
+
+        if word_list_fp in os.listdir(ldnoobw_dir):
+            with open(word_list_fp, 'a') as f:
+                f.write("\n")
+                f.write('\n'.join(words))
+        else:
+            with open(word_list_fp, 'w') as f:
+                f.write('\n'.join(words))
+        print(f"bad words list ({lang}) updated FROM LOCAL.")
+
+
 def create_bad_words_list(artifacts_dir: Path, lang: str):
     r""" Fetch the LDNOOBW word list
 
@@ -124,7 +146,8 @@ def create_bad_words_list(artifacts_dir: Path, lang: str):
 
     response = requests.get(url)
     if response.status_code != 200:
-        raise Exception(f"{response.status_code} -- {url}.")
+        print(Exception(f"{response.status_code} -- {url}."))
+        return
 
     data = response.content.decode('utf-8')
 
@@ -144,6 +167,7 @@ def main():
     parser.add_argument("--langs", type=str, nargs="+")
     parser.add_argument("--artifacts_dir", type=str)
     parser.add_argument("--block_categories", type=str, nargs="+")
+    parser.add_argument("--local_bad_wordlists_dir", type=str, default="")
     args = parser.parse_args()
 
     artifacts_dir = Path(args.artifacts_dir)
@@ -160,6 +184,13 @@ def main():
             create_bad_words_list(lang=lang, artifacts_dir=artifacts_dir)
         except Exception as e:
             print(f"Failed to fetch LDNOOBW {lang}: {e}")
+
+        if args.local_bad_wordlists_dir:
+            load_from_local_bad_words(
+                dirpath=args.local_bad_wordlists_dir,
+                lang=lang,
+                artifacts_dir=artifacts_dir
+            )
 
 
 if __name__ == '__main__':
