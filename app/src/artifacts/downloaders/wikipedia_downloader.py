@@ -51,18 +51,22 @@ class WikipediaDownloader:
         try:
             # try to load wikipedia data from preprocessed huggingface dataset
             ds_iterator = load_dataset(
-                "wikipedia", f"20220301.{self._lang}", streaming=True,
-                split="train"
+                "wikimedia/wikipedia", f"20231101.{self._lang}", streaming=True,
+                split="train", trust_remote_code=True
             )
-            logger.info(f"{str(self)} Load {self._lang}-wiki from 20220301")
+            logger.info(f"{str(self)} Load {self._lang}-wiki from 20231101")
         except Exception as _:
             # if that fails, load from original huggingface dataset and process
             ds_iterator = load_dataset(
-                "wikipedia", language=self._lang, date="20230801",
-                cache_dir=self._cache_dir, beam_runner="DirectRunner",
-                split="train"
+                "wikimedia/wikipedia",
+                language=self._lang,
+                date="20231101",
+                cache_dir=self._cache_dir,
+                beam_runner="DirectRunner",
+                split="train",
+                trust_remote_code=True
             )
-            logger.info(f"{str(self)} Load {self._lang}-wiki from 20230801")
+            logger.info(f"{str(self)} Load {self._lang}-wiki from 20231101")
 
         n_docs = 0
         for record in ds_iterator:

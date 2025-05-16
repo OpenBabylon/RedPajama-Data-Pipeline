@@ -6,6 +6,7 @@ from pathlib import Path
 
 from artifacts.downloaders import (
     WikipediaDownloader,
+    UkrNewsDownloader,
     OpenWebTextDownloader,
     BooksDownloader,
     CCNetDownloader
@@ -77,6 +78,11 @@ def parse_arguments():
         help="Maximum number of paragraphs to use per book sample"
     )
 
+    parser.add_argument(
+        "--wiki_max_samples", type=int, default=10_000,
+        help="Maximum number of paragraphs to use per book sample"
+    )
+
     return parser.parse_args()
 
 
@@ -109,38 +115,50 @@ def main(artifacts_dir: str, cc_input: str, cc_input_base_uri: str,
     logger.info(f"PYTHONHASHSEED: {os.environ.get('PYTHONHASHSEED')}")
 
     # download ccnet dataset
-    ccnet = CCNetDownloader(
-        lang=lang, artifacts_dir=artifacts_dir, cc_input=cc_input,
-        cc_input_base_uri=cc_input_base_uri, num_samples=num_samples,
-        max_workers=max_workers, endpoint_url=endpoint_url
-    )
-    ccnet.run(logger=logger)
+    # ccnet = CCNetDownloader(
+    #     lang=lang, artifacts_dir=artifacts_dir, cc_input=cc_input,
+    #     cc_input_base_uri=cc_input_base_uri, num_samples=num_samples,
+    #     max_workers=max_workers, endpoint_url=endpoint_url
+    # )
+    # ccnet.run(logger=logger)
 
     # download wikipedia dataset
     wikipedia = WikipediaDownloader(
         lang=lang, out_dir=datasets_dir,
         overwrite=overwrite, cache_dir=cache_dir,
-        max_samples=num_samples
+        max_samples=args.wiki_max_samples
     )
     wikipedia.run(logger=logger)
 
-    # download openwebtext dataset
-    openwebtext = OpenWebTextDownloader(
-        lang=lang, out_dir=datasets_dir,
-        overwrite=overwrite, cache_dir=cache_dir,
-        max_samples=num_samples
-    )
-    openwebtext.run(logger=logger)
-
-    # download books dataset
-    books = BooksDownloader(
-        lang=lang, out_dir=datasets_dir,
-        overwrite=overwrite, cache_dir=cache_dir,
-        max_samples=num_samples,
+    # download ukr news
+    ukrnews = UkrNewsDownloader(
+        lang=lang,
+        out_dir=datasets_dir,
+        overwrite=overwrite,
+        cache_dir=cache_dir,
+        max_samples=2000,
         max_paragraphs_per_sample=max_paragraphs_per_book_sample,
         max_samples_per_book=max_samples_per_book,
     )
-    books.run(logger=logger)
+    ukrnews.run(logger=logger)
+
+    # download openwebtext dataset
+    # openwebtext = OpenWebTextDownloader(
+    #     lang=lang, out_dir=datasets_dir,
+    #     overwrite=overwrite, cache_dir=cache_dir,
+    #     max_samples=num_samples
+    # )
+    # openwebtext.run(logger=logger)
+
+    # download books dataset
+    # books = BooksDownloader(
+    #     lang=lang, out_dir=datasets_dir,
+    #     overwrite=overwrite, cache_dir=cache_dir,
+    #     max_samples=num_samples,
+    #     max_paragraphs_per_sample=max_paragraphs_per_book_sample,
+    #     max_samples_per_book=max_samples_per_book,
+    # )
+    # books.run(logger=logger)
 
     # compute hash distributions
     hash_dist = HashDist(
@@ -152,7 +170,7 @@ def main(artifacts_dir: str, cc_input: str, cc_input_base_uri: str,
     )
 
     # compute hash distribution for each dataset
-    for obj in [wikipedia, openwebtext, books, ccnet]:
+    for obj in [wikipedia, ukrnews]:
         fp = obj.filepath
 
         if fp is None:
@@ -164,7 +182,7 @@ def main(artifacts_dir: str, cc_input: str, cc_input_base_uri: str,
         # compute fasttext palm classifier
         target_name = "palm"
         target_data = [
-            wikipedia.filepath, books.filepath, openwebtext.filepath
+            wikipedia.filepath
         ]
     else:
         # for non english languages, we use wikipedia as target
@@ -173,7 +191,7 @@ def main(artifacts_dir: str, cc_input: str, cc_input_base_uri: str,
 
     trainer = FastTextTrainer(
         artifacts_dir=artifacts_dir,
-        ccnet_data=ccnet.filepath,
+        ccnet_data=ukrnews.filepath,
         target_data=target_data,
         target_name=target_name,
         samples_per_class=classifiers_num_samples,

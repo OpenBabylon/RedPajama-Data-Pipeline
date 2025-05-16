@@ -1,0 +1,33 @@
+name: a100_one
+
+resources:
+  cpus: 4+
+  memory: 32+
+  ports: 8080-8100
+  cloud: gcp
+  use_spot: True
+  region: us-central1
+  disk_size: 500
+
+
+workdir: .
+
+file_mounts:
+  /data:
+    source: ${BUCKET}
+    mode: MOUNT
+
+setup: |
+  apt-get update && apt-get install -y
+  apt-get install build-essential -y
+  apt-get install isal -y
+  pip install -r app/requirements.txt
+  echo "SETUP DONE"
+
+run: |
+  echo "RUN DONE"
+
+#  apt-get install gcc -y
+
+envs:
+  BUCKET: gs://gpu-research-cloud-1
