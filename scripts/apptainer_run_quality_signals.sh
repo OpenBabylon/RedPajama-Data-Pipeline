@@ -77,11 +77,11 @@ if [ -z "${LISTINGS}" ]; then
   LISTINGS="${ARTIFACTS_DIR%/}/listings/listings-${DUMP_ID}.txt"
 fi
 
-apptainer cache clean -f
-apptainer run \
-  --env AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" --env AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-  "docker://docker.io/${DOCKER_REPO}:amd64" \
-  python3 /usr/app/src/pipeline.py \
+#apptainer cache clean -f
+#apptainer run \
+#  --env AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" --env AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+#  "docker://docker.io/${DOCKER_REPO}:amd64" \
+python3 app/src/pipeline.py \
   --input "${LISTINGS}" \
   --input_base_uri "${INPUT_BASE_URI}" \
   --output_base_uri "${OUTPUT_BASE_URI}" \

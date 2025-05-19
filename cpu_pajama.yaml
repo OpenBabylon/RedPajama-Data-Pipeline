@@ -18,16 +18,14 @@ file_mounts:
     mode: MOUNT
 
 setup: |
-  apt-get update && apt-get install -y
-  apt-get install build-essential -y
-  apt-get install isal -y
+  sudo apt-get update && apt-get install -y
+  sudo apt-get install build-essential -y
+  sudo apt-get install isal -y
   pip install -r app/requirements.txt
   echo "SETUP DONE"
 
 run: |
   echo "RUN DONE"
-
-#  apt-get install gcc -y
 
 envs:
   BUCKET: gs://gpu-research-cloud-1

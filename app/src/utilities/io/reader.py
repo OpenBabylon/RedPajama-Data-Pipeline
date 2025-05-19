@@ -107,6 +107,7 @@ class Reader:
 
             if fp.suffix == ".jsonl":
                 return open(fp, mode="rb")
+
         except Exception as e:
             raise LocalReadError(
                 f"__LOCAL_URI_READ_ERROR__ failed reading {uri.path}: "

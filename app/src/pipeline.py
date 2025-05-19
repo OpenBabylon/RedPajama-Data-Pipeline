@@ -250,7 +250,21 @@ class RPSignalJob:
 
         return parser.parse_args()
 
-    def __parse_input_listings(self) -> Dict[str, List[str]]:
+    def __parse_input_listings(self):
+        inputs_per_language = {}
+
+        for lang in os.listdir(self._artifacts_dir / "datasets"):
+            if lang not in inputs_per_language:
+                inputs_per_language[lang] = []
+
+            full_lang_dir = self._artifacts_dir / "datasets" / lang
+            for dataset_dir in os.listdir(full_lang_dir):
+                for dataset_jsonl_filename in os.listdir(full_lang_dir / dataset_dir):
+                    inputs_per_language[lang].append(full_lang_dir / dataset_dir / dataset_jsonl_filename)
+
+        return inputs_per_language
+
+    def cc__parse_input_listings(self) -> Dict[str, List[str]]:
         r""" Parse the input listing """
         if self._args.input is None:
             raise ValueError("Input argument must be provided")
@@ -369,8 +383,10 @@ class RPSignalJob:
             logger.info(f"{lang}: {len(self._input_listings[lang]):,} inputs")
 
         for lang in self._languages:
+            print(">>> ",lang)
             lang_inputs = self._input_listings[lang]
             random.shuffle(lang_inputs)
+            print(">>> ", len(lang_inputs))
 
             logger.info("*" * 80)
             logger.info(f"Start processing {lang}")
@@ -378,7 +394,7 @@ class RPSignalJob:
             chunk_size = self._args.inputs_per_process
             input_chunks = [
                 lang_inputs[i * chunk_size:(i + 1) * chunk_size]
-                for i in range(len(lang_inputs) // chunk_size)
+                for i in range(max(len(lang_inputs) // chunk_size, 1))
             ]
 
             max_docs_per_chunk = self._args.max_docs // len(input_chunks)

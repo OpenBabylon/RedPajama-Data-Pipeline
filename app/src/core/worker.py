@@ -291,8 +291,14 @@ class Worker:
     def __process_uri(self, docs_to_fetch: int, uri: str):
         num_docs = 0
         docs_added = 0
-        snapshot_id = self.snapsh_re.search(uri).group(0)
-        uri_id = self.uri_id_re.search(uri).group(0)
+        path, tail = os.path.split(uri)
+        snapshot_id = tail
+
+        path_, tail_1 = os.path.split(uri)
+        uri_id = os.path.join(tail, tail_1)
+
+        # snapshot_id = self.snapsh_re.search(uri).group(0)
+        # uri_id = self.uri_id_re.search(uri).group(0)
 
         # signal writer
         signal_uri = os.path.join(
